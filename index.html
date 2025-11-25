@@ -94,7 +94,14 @@ const infoText=document.getElementById("infoSeleccion");
 let selectedDay=null;
 let selectedSlot=null;
 
-const horarios=["15:00","16:00","17:00","18:00"];
+const horarios=["15:00","16:00","17:00"];
+
+// ⭐ REDIRECCIÓN A WHATSAPP
+function redirigirWhatsapp(nombre,fecha,hora){
+  const numero="5215527027808";
+  const texto=encodeURIComponent(`Hola, soy ${nombre}. Confirmo mi reserva para el ${fecha} a las ${hora}.`);
+  window.open(`https://wa.me/${numero}?text=${texto}`,"_blank");
+}
 
 function renderCalendar(){
  calendar.innerHTML="";
@@ -104,6 +111,9 @@ function renderCalendar(){
  const monthNames=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
  monthLabel.textContent=`${monthNames[month]} ${year}`;
 
+ const firstDay=new Date(year,month,1).getDay();
+ const daysInMonth=new Date(year,month+1,0).getDate();
+
  const diasSemana=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
  diasSemana.forEach(d=>{
   const div=document.createElement("div");
@@ -112,42 +122,23 @@ function renderCalendar(){
   calendar.appendChild(div);
  });
 
- const firstDay=(new Date(year,month,1).getDay());
- const daysInMonth=new Date(year,month+1,0).getDate();
-
  for(let i=0;i<firstDay;i++){
-   const empty=document.createElement("div");
-   empty.classList.add("empty");
-   calendar.appendChild(empty);
+  calendar.appendChild(document.createElement("div"));
  }
 
  for(let d=1;d<=daysInMonth;d++){
-   const div=document.createElement("div");
-   div.classList.add("day");
-   div.textContent=d;
+  const div=document.createElement("div");
+  div.classList.add("day");
+  div.textContent=d;
 
-   const dateStr=`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-   const today=new Date();
-   const compare=new Date(dateStr+"T00:00");
-
-   if(compare < new Date(today.getFullYear(),today.getMonth(),today.getDate())){
-     div.classList.add("disabled");
-   } else {
-     div.onclick=()=>selectDay(d,month+1,year);
-   }
-
-   if(selectedDay===dateStr){
-     div.classList.add("selected");
-   }
-
-   calendar.appendChild(div);
+  div.onclick=()=>selectDay(d,month+1,year);
+  calendar.appendChild(div);
  }
 }
 
 async function selectDay(day,month,year){
  selectedDay=`${year}-${String(month).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
  infoText.textContent=`Elegiste: ${selectedDay}`;
- renderCalendar();
  renderSlots();
 }
 
@@ -158,7 +149,6 @@ async function renderSlots(){
  const reservadas=data?data.map(r=>r.hora):[];
 
  slotsDiv.innerHTML="";
-
  horarios.forEach(h=>{
   const div=document.createElement("div");
   div.classList.add("slot");
@@ -185,6 +175,7 @@ document.getElementById("prev").onclick=()=>{
  currentDate.setMonth(currentDate.getMonth()-1);
  renderCalendar();
 };
+
 document.getElementById("next").onclick=()=>{
  currentDate.setMonth(currentDate.getMonth()+1);
  renderCalendar();
@@ -209,9 +200,15 @@ document.getElementById("reservaForm").addEventListener("submit",async(e)=>{
  if(error){alert("Error al reservar");return;}
 
  alert("Reserva confirmada ✔");
+
+ // ⭐ REDIRECCIÓN A WHATSAPP
+ redirigirWhatsapp(nombre,selectedDay,selectedSlot);
+
  renderSlots();
 });
 </script>
 
 </body>
 </html>
+
+
